@@ -1,2 +1,59 @@
-# TODO: migrate all dependencies from WORKSPACE to MODULE.bazel
-# https://github.com/bazelbuild/buildtools/issues/1204
+"""buildtools"""
+
+module(
+    name = "buildtools",
+    repo_name = "com_github_bazelbuild_buildtools",
+)
+
+bazel_dep(name = "rules_go", version = "0.45.1", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "bazel_skylib", version = "1.5.0")
+
+go_sdk = use_extension("@io_bazel_rules_go//go:extension.bzl", "go_sdk")
+go_sdk.download(version = "1.20.3")
+
+bazel_dep(name = "gazelle", version = "0.30.0", repo_name = "bazel_gazelle")
+
+# cannot use from_file method in go_deps due to go 1.15 in go.mod
+go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
+go_deps.module(
+    path = "github.com/golang/protobuf",
+    version = "v1.4.3",
+)
+go_deps.module(
+    path = "go.starlark.net",
+    sum = "h1:Qoe+9POtDT51UBQ8XEnS9QKeHDQzEl2QRh3eok9R4aw=",
+    version = "v0.0.0-20200203144150-6677ee5c7211",
+)
+go_deps.module(
+    path = "google.golang.org/protobuf",
+    sum = "h1:Ejskq+SyPohKW+1uil0JJMtmHCgJPJ/qWTxr8qp+R4c=",
+    version = "v1.25.0",
+)
+go_deps.module(
+    path = "golang.org/x/tools",
+    sum = "h1:FvmRgNOcs3kOa+T20R1uhfP9F6HgG2mfxDv1vrx1Htc=",
+    version = "v0.17.0",
+)
+go_deps.module(
+    path = "github.com/google/go-cmp",
+    sum = "",
+    version = "v0.5.9",
+)
+use_repo(
+    go_deps,
+    "com_github_golang_protobuf",
+    "com_github_google_go_cmp",
+    "net_starlark_go",
+    "org_golang_google_protobuf",
+    "org_golang_x_tools",
+)
+
+# protobuf 24.4 is not in BCR
+bazel_dep(name = "protobuf", version = "21.7", repo_name = "com_google_protobuf")
+bazel_dep(name = "rules_proto", version = "6.0.0-rc1")
+bazel_dep(name = "rules_nodejs", version = "6.0.2")
+
+node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
+node.toolchain(node_version = "16.7.0")
+
+bazel_dep(name = "aspect_rules_js", version = "1.32.6")
